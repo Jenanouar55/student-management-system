@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Dashboard</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f6fa; color: #222; min-height: 100vh; }
+
+    /* ── Layout ───────────────────────────────────────── */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ──────────────────────────────────────── */
+    .sidebar { width: 200px; background: #1e1e2e; color: #ccc; display: flex; flex-direction: column; padding: 24px 0; flex-shrink: 0; }
+    .sidebar .logo { font-size: 1rem; font-weight: 700; color: #fff; padding: 0 20px 24px; border-bottom: 1px solid #2e2e42; }
+    .nav-link { display: block; padding: 12px 20px; color: #aaa; cursor: pointer; font-size: .9rem; transition: background .15s, color .15s; }
+    .nav-link:hover  { background: #2a2a3e; color: #fff; }
+    .nav-link.active { background: #2a2a3e; color: #7c8cf8; font-weight: 600; }
+
+    /* ── Main ─────────────────────────────────────────── */
+    .main { flex: 1; padding: 32px; overflow-y: auto; }
+    h2 { font-size: 1.2rem; margin-bottom: 20px; color: #333; }
+
+    /* ── Stat cards ───────────────────────────────────── */
+    .cards { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+    .card { background: #fff; border-radius: 8px; padding: 20px 24px; flex: 1; min-width: 140px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+    .card .label { font-size: .75rem; color: #888; margin-bottom: 6px; }
+    .card .value { font-size: 2rem; font-weight: 700; color: #1e1e2e; }
+
+    /* ── Panel ────────────────────────────────────────── */
+    .panel { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.07); margin-bottom: 20px; }
+
+    /* ── Form ─────────────────────────────────────────── */
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: .75rem; color: #666; }
+    input[type=text], input[type=email], input[type=date], input[type=number], select {
+      padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: .9rem; outline: none; width: 180px;
+    }
+    select { background: #fff; }
+    input:focus, select:focus { border-color: #7c8cf8; }
+
+    /* ── Buttons ──────────────────────────────────────── */
+    button { padding: 7px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: .85rem; font-weight: 600; }
+    .btn-primary { background: #7c8cf8; color: #fff; }
+    .btn-primary:hover { background: #6270e0; }
+    .btn-ghost { background: #f0f0f0; color: #555; }
+    .btn-ghost:hover { background: #e0e0e0; }
+    .btn-danger { background: #ff5a5a; color: #fff; font-size: .8rem; padding: 4px 10px; }
+    .btn-danger:hover { background: #e04040; }
+    .btn-edit { background: #eef; color: #7c8cf8; border: 1px solid #c0c8ff; font-size: .8rem; padding: 4px 10px; }
+    .btn-edit:hover { background: #dde; }
+
+    /* ── Table ────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { text-align: left; padding: 8px 10px; color: #888; font-weight: 600; font-size: .78rem; border-bottom: 1px solid #eee; }
+    td { padding: 9px 10px; border-bottom: 1px solid #f2f2f2; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    /* ── Pages ────────────────────────────────────────── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Recent list ──────────────────────────────────── */
+    .recent-item { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f2f2f2; font-size: .88rem; }
+    .recent-item:last-child { border-bottom: none; }
+    .recent-item .name { font-weight: 500; }
+    .recent-item .date { color: #aaa; font-size: .8rem; }
+
+    /* ── Score badge ──────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: .8rem;
+      font-weight: 700;
+    }
+    .badge.high   { background: #dcfce7; color: #16a34a; } /* ≥ 14  */
+    .badge.mid    { background: #fef9c3; color: #ca8a04; } /* 10-13 */
+    .badge.low    { background: #fee2e2; color: #dc2626; } /* < 10  */
+
+    /* ── Toast ────────────────────────────────────────── */
+    #toast {
+      position: fixed; top: 24px; right: 24px;
+      padding: 14px 20px; border-radius: 8px;
+      font-size: .9rem; font-weight: 500; color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      opacity: 0; transform: translateY(-12px); pointer-events: none;
+      transition: opacity .25s, transform .25s; z-index: 9999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    #toast.success { background: #22c55e; }
+    #toast.deleted { background: #ef4444; }
+
+    /* ── Delete modal ─────────────────────────────────── */
+    #modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.35);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9000; opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    #modal-overlay.show { opacity: 1; pointer-events: auto; }
+    #modal {
+      background: #fff; border-radius: 12px; padding: 28px 32px; width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18); transform: scale(.95);
+      transition: transform .2s; text-align: center;
+    }
+    #modal-overlay.show #modal { transform: scale(1); }
+    #modal .icon { font-size: 2.4rem; margin-bottom: 12px; }
+    #modal h3 { font-size: 1.05rem; margin-bottom: 8px; color: #1e1e2e; }
+    #modal p  { font-size: .88rem; color: #666; margin-bottom: 24px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; }
+    .modal-actions button { flex: 1; padding: 9px 0; font-size: .9rem; }
+  </style>
+</head>
+<body>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<!-- Delete confirm modal -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="icon">🗑️</div>
+    <h3 id="modal-title">Delete?</h3>
+    <p id="modal-msg">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost"  onclick="closeModal()">Cancel</button>
+      <button class="btn-danger" id="modal-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- App layout -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="logo">🎓 StudentApp</div>
+    <span class="nav-link active" onclick="showPage('dashboard', this)">Dashboard</span>
+    <span class="nav-link"       onclick="showPage('students',  this)">Students</span>
+    <span class="nav-link"       onclick="showPage('add',       this)">Add Student</span>
+    <span class="nav-link"       onclick="showPage('grades',    this)">Grades</span>
+  </nav>
+
+  <div class="main">
+
+    <!-- ════ PAGE: Dashboard ════ -->
+    <div id="page-dashboard" class="page active">
+      <h2>Dashboard</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="label">Total Students</div>
+          <div class="value" id="stat-total">—</div>
+        </div>
+        <div class="card">
+          <div class="label">Enrolled This Year</div>
+          <div class="value" id="stat-year">—</div>
+        </div>
+        <div class="card">
+          <div class="label">Total Grades</div>
+          <div class="value" id="stat-grades">—</div>
+        </div>
+        <div class="card">
+          <div class="label">Class Average</div>
+          <div class="value" id="stat-avg">—</div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2 style="margin-bottom:12px;font-size:1rem">Recent Students</h2>
+        <div id="recent-list">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: Students table ════ -->
+    <div id="page-students" class="page">
+      <h2>All Students</h2>
+      <div class="panel">
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Enrolled</th><th></th></tr></thead>
+          <tbody id="student-list"><tr><td colspan="5">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: Add / Edit student ════ -->
+    <div id="page-add" class="page">
+      <h2 id="form-title">Add Student</h2>
+      <div class="panel">
+        <!--
+          BEGINNER NOTE:
+          #s-id is hidden. Empty = create (POST). Filled = update (PUT).
+          One form handles both cases.
+        -->
+        <input type="hidden" id="s-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text"  id="s-name"  placeholder="Jane Doe" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="s-email" placeholder="jane@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Enrollment Date</label>
+            <input type="date"  id="s-date" />
+          </div>
+          <div class="form-group" style="justify-content:flex-end">
+            <button class="btn-primary" onclick="saveStudent()">Save</button>
+          </div>
+          <div class="form-group" style="justify-content:flex-end">
+            <button class="btn-ghost" onclick="cancelStudent()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PAGE: Grades (Notes) ════ -->
+    <div id="page-grades" class="page">
+      <h2>Grades</h2>
+
+      <!-- Add / Edit grade form -->
+      <div class="panel">
+        <!--
+          BEGINNER NOTE:
+          Same hidden-id trick as the student form.
+          #g-student-id links the grade to a student (foreign key).
+        -->
+        <input type="hidden" id="g-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Student</label>
+            <!-- Dropdown filled from the students list by JS -->
+            <select id="g-student-id"></select>
+          </div>
+          <div class="form-group">
+            <label>Subject</label>
+            <input type="text" id="g-subject" placeholder="e.g. Math" style="width:130px" />
+          </div>
+          <div class="form-group">
+            <label>Score (0–20)</label>
+            <input type="number" id="g-score" min="0" max="20" step="0.5" placeholder="0" style="width:100px" />
+          </div>
+          <div class="form-group">
+            <label>Note (optional)</label>
+            <input type="text" id="g-note" placeholder="e.g. Good effort" style="width:180px" />
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="g-date" style="width:150px" />
+          </div>
+          <div class="form-group" style="justify-content:flex-end">
+            <button class="btn-primary" onclick="saveGrade()">Save Grade</button>
+          </div>
+          <div class="form-group" style="justify-content:flex-end">
+            <button class="btn-ghost" onclick="cancelGrade()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter by student -->
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        <label style="font-size:.85rem;color:#666">Filter by student:</label>
+        <select id="g-filter" onchange="renderGrades()" style="width:200px">
+          <option value="">All students</option>
+        </select>
+      </div>
+
+      <!-- Grades table -->
+      <div class="panel">
+        <table>
+          <thead>
+            <tr><th>Student</th><th>Subject</th><th>Score</th><th>Note</th><th>Date</th><th></th></tr>
+          </thead>
+          <tbody id="grade-list"><tr><td colspan="6">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+  const studentsApi = '/api/students';
+  const gradesApi   = '/api/grades';
+  const $ = id => document.getElementById(id);
+
+  let allStudents = [];
+  let allGrades   = [];
+  let pendingDelete = null; // { id, type: 'student'|'grade' }
+
+  /* ── Navigation ──────────────────────────────────────*/
+  function showPage(name, link) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    $(`page-${name}`).classList.add('active');
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+  }
+
+  /* ── Toast ───────────────────────────────────────────
+   * type: 'success' (green) or 'deleted' (red)
+   */
+  function showToast(message, type = 'success') {
+    const t = $('toast');
+    t.textContent = (type === 'success' ? '✅  ' : '🗑️  ') + message;
+    t.className = `show ${type}`;
+    setTimeout(() => { t.className = ''; }, 3000);
+  }
+
+  /* ── Modal ───────────────────────────────────────────
+   * Generic delete confirmation.
+   * onConfirm is a function called when the user clicks Delete.
+   */
+  function openModal(title, message, onConfirm) {
+    $('modal-title').textContent = title;
+    $('modal-msg').textContent   = message;
+    $('modal-confirm').onclick   = () => { closeModal(); onConfirm(); };
+    $('modal-overlay').classList.add('show');
+  }
+  function closeModal() {
+    $('modal-overlay').classList.remove('show');
+  }
+  $('modal-overlay').addEventListener('click', e => {
+    if (e.target === $('modal-overlay')) closeModal();
+  });
+
+  /* ── Load everything ─────────────────────────────────
+   * Fetches students and grades in parallel, then renders.
+   */
+  async function load() {
+    // Promise.all runs both fetches at the same time (faster)
+    [allStudents, allGrades] = await Promise.all([
+      fetch(studentsApi).then(r => r.json()),
+      fetch(gradesApi).then(r => r.json())
+    ]);
+    renderDashboard();
+    renderTable();
+    renderStudentDropdowns();
+    renderGrades();
+  }
+
+  /* ── Score badge ─────────────────────────────────────
+   * Returns a coloured HTML span based on the score value.
+   * ≥14 = green (high), 10-13 = yellow (mid), <10 = red (low)
+   */
+  function scoreBadge(score) {
+    const cls = score >= 14 ? 'high' : score >= 10 ? 'mid' : 'low';
+    return `<span class="badge ${cls}">${score}</span>`;
+  }
+
+  /* ── Dashboard ───────────────────────────────────────*/
+  function renderDashboard() {
+    const thisYear = new Date().getFullYear();
+    $('stat-total').textContent  = allStudents.length;
+    $('stat-grades').textContent = allGrades.length;
+
+    $('stat-year').textContent = allStudents.filter(
+      s => new Date(s.enrollmentDate).getFullYear() === thisYear
+    ).length;
+
+    // Class average score (rounded to 1 decimal)
+    if (allGrades.length) {
+      const avg = allGrades.reduce((sum, g) => sum + g.score, 0) / allGrades.length;
+      $('stat-avg').textContent = avg.toFixed(1);
+    } else {
+      $('stat-avg').textContent = '—';
+    }
+
+    // 5 most recently enrolled students
+    const recent = [...allStudents]
+      .sort((a, b) => new Date(b.enrollmentDate) - new Date(a.enrollmentDate))
+      .slice(0, 5);
+
+    $('recent-list').innerHTML = recent.length
+      ? recent.map(s => `
+          <div class="recent-item">
+            <span class="name">${s.fullName}</span>
+            <span class="date">${s.enrollmentDate.slice(0,10)}</span>
+          </div>`).join('')
+      : '<p style="color:#aaa;font-size:.85rem">No students yet.</p>';
+  }
+
+  /* ── Students table ──────────────────────────────────*/
+  function renderTable() {
+    $('student-list').innerHTML = allStudents.length
+      ? allStudents.map(s => `
+          <tr>
+            <td style="color:#aaa">${s.id}</td>
+            <td>${s.fullName}</td>
+            <td>${s.email}</td>
+            <td>${s.enrollmentDate.slice(0,10)}</td>
+            <td style="display:flex;gap:6px">
+              <button class="btn-edit"   onclick='startEditStudent(${JSON.stringify(s)})'>Edit</button>
+              <button class="btn-danger" onclick="deleteStudent(${s.id},'${s.fullName.replace(/'/g,"\\'")}')">Delete</button>
+            </td>
+          </tr>`).join('')
+      : '<tr><td colspan="5" style="color:#aaa">No students yet.</td></tr>';
+  }
+
+  /* ── Student dropdowns ───────────────────────────────
+   * Fills both the grade form select and the filter select.
+   */
+  function renderStudentDropdowns() {
+    const options = allStudents.map(s => `<option value="${s.id}">${s.fullName}</option>`).join('');
+    $('g-student-id').innerHTML = options || '<option>No students</option>';
+
+    // Filter dropdown has an extra "All" option at the top
+    $('g-filter').innerHTML =
+      '<option value="">All students</option>' + options;
+  }
+
+  /* ── Grades table ────────────────────────────────────
+   * Optionally filters by the selected student in #g-filter.
+   */
+  function renderGrades() {
+    const filterVal = $('g-filter').value;
+    const list = filterVal
+      ? allGrades.filter(g => g.studentId == filterVal)
+      : allGrades;
+
+    $('grade-list').innerHTML = list.length
+      ? list.map(g => `
+          <tr>
+            <td>${g.studentName}</td>
+            <td>${g.subject}</td>
+            <td>${scoreBadge(g.score)}</td>
+            <td style="color:#888">${g.note || '—'}</td>
+            <td>${g.date.slice(0,10)}</td>
+            <td style="display:flex;gap:6px">
+              <button class="btn-edit"   onclick='startEditGrade(${JSON.stringify(g)})'>Edit</button>
+              <button class="btn-danger" onclick="deleteGrade(${g.id},'${g.subject}')">Delete</button>
+            </td>
+          </tr>`).join('')
+      : '<tr><td colspan="6" style="color:#aaa">No grades yet.</td></tr>';
+  }
+
+  /* ── Save student ────────────────────────────────────*/
+  async function saveStudent() {
+    const id   = $('s-id').value;
+    const body = {
+      fullName:       $('s-name').value,
+      email:          $('s-email').value,
+      enrollmentDate: $('s-date').value || new Date().toISOString()
+    };
+    await fetch(id ? `${studentsApi}/${id}` : studentsApi, {
+      method:  id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body)
+    });
+    showToast(id ? 'Student updated successfully.' : 'Student added successfully.');
+    cancelStudent();
+    $('form-title').textContent = 'Add Student';
+    await load();
+  }
+
+  function startEditStudent(s) {
+    $('s-id').value    = s.id;
+    $('s-name').value  = s.fullName;
+    $('s-email').value = s.email;
+    $('s-date').value  = s.enrollmentDate.slice(0,10);
+    $('form-title').textContent = 'Edit Student';
+    showPage('add', document.querySelectorAll('.nav-link')[2]);
+  }
+
+  function deleteStudent(id, name) {
+    openModal('Delete Student?', `"${name}" and their grades will be removed.`, async () => {
+      await fetch(`${studentsApi}/${id}`, { method: 'DELETE' });
+      showToast('Student deleted.', 'deleted');
+      await load();
+    });
+  }
+
+  function cancelStudent() {
+    ['s-id','s-name','s-email','s-date'].forEach(x => $(x).value = '');
+    $('form-title').textContent = 'Add Student';
+  }
+
+  /* ── Save grade ──────────────────────────────────────*/
+  async function saveGrade() {
+    const id   = $('g-id').value;
+    const body = {
+      studentId: parseInt($('g-student-id').value),
+      subject:   $('g-subject').value,
+      score:     parseFloat($('g-score').value) || 0,
+      note:      $('g-note').value,
+      date:      $('g-date').value || new Date().toISOString()
+    };
+    await fetch(id ? `${gradesApi}/${id}` : gradesApi, {
+      method:  id ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body)
+    });
+    showToast(id ? 'Grade updated successfully.' : 'Grade added successfully.');
+    cancelGrade();
+    await load();
+  }
+
+  function startEditGrade(g) {
+    $('g-id').value         = g.id;
+    $('g-student-id').value = g.studentId;
+    $('g-subject').value    = g.subject;
+    $('g-score').value      = g.score;
+    $('g-note').value       = g.note;
+    $('g-date').value       = g.date.slice(0,10);
+  }
+
+  function deleteGrade(id, subject) {
+    openModal('Delete Grade?', `The grade for "${subject}" will be removed.`, async () => {
+      await fetch(`${gradesApi}/${id}`, { method: 'DELETE' });
+      showToast('Grade deleted.', 'deleted');
+      await load();
+    });
+  }
+
+  function cancelGrade() {
+    ['g-id','g-subject','g-score','g-note','g-date'].forEach(x => $(x).value = '');
+  }
+
+  load();
+</script>
+</body>
+</html>

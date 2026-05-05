@@ -1,0 +1,15 @@
+[Bb]in/
+[Oo]bj/
+*.exe
+*.dll
+*.pdb
+*.user
+*.suo
+.vs/
+.vscode/
+*.sln.dotsettings.user
+.DS_Store
+*.db-shm
+*.db-wal
+*.nupkg
+packages/
