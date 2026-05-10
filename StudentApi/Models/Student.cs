@@ -1,4 +1,4 @@
-namespace StudentApi.Models
+  namespace StudentApi.Models
 {
     /// <summary>
     /// Represents a student record stored in the database.

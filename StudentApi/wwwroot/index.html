@@ -1,37 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Student Dashboard</title>
+  <title>Tableau de Bord</title>
   <style>
-    /* ── Reset & base ─────────────────────────────────── */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f5f6fa; color: #222; min-height: 100vh; }
 
-    /* ── Layout ───────────────────────────────────────── */
     .layout { display: flex; min-height: 100vh; }
 
-    /* ── Sidebar ──────────────────────────────────────── */
     .sidebar { width: 200px; background: #1e1e2e; color: #ccc; display: flex; flex-direction: column; padding: 24px 0; flex-shrink: 0; }
     .sidebar .logo { font-size: 1rem; font-weight: 700; color: #fff; padding: 0 20px 24px; border-bottom: 1px solid #2e2e42; }
     .nav-link { display: block; padding: 12px 20px; color: #aaa; cursor: pointer; font-size: .9rem; transition: background .15s, color .15s; }
     .nav-link:hover  { background: #2a2a3e; color: #fff; }
     .nav-link.active { background: #2a2a3e; color: #7c8cf8; font-weight: 600; }
 
-    /* ── Main ─────────────────────────────────────────── */
     .main { flex: 1; padding: 32px; overflow-y: auto; }
     h2 { font-size: 1.2rem; margin-bottom: 20px; color: #333; }
 
-    /* ── Stat cards ───────────────────────────────────── */
     .cards { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
     .card { background: #fff; border-radius: 8px; padding: 20px 24px; flex: 1; min-width: 140px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
     .card .label { font-size: .75rem; color: #888; margin-bottom: 6px; }
     .card .value { font-size: 2rem; font-weight: 700; color: #1e1e2e; }
 
-    /* ── Panel ────────────────────────────────────────── */
     .panel { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.07); margin-bottom: 20px; }
 
-    /* ── Form ─────────────────────────────────────────── */
     .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
     .form-group { display: flex; flex-direction: column; gap: 4px; }
     .form-group label { font-size: .75rem; color: #666; }
@@ -42,7 +35,6 @@
     select { background: #fff; }
     input:focus, select:focus { border-color: #7c8cf8; }
 
-    /* ── Buttons ──────────────────────────────────────── */
     button { padding: 7px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: .85rem; font-weight: 600; }
     .btn-primary { background: #7c8cf8; color: #fff; }
     .btn-primary:hover { background: #6270e0; }
@@ -53,36 +45,27 @@
     .btn-edit { background: #eef; color: #7c8cf8; border: 1px solid #c0c8ff; font-size: .8rem; padding: 4px 10px; }
     .btn-edit:hover { background: #dde; }
 
-    /* ── Table ────────────────────────────────────────── */
     table { width: 100%; border-collapse: collapse; font-size: .88rem; }
     th { text-align: left; padding: 8px 10px; color: #888; font-weight: 600; font-size: .78rem; border-bottom: 1px solid #eee; }
     td { padding: 9px 10px; border-bottom: 1px solid #f2f2f2; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #fafafa; }
 
-    /* ── Pages ────────────────────────────────────────── */
     .page { display: none; }
     .page.active { display: block; }
 
-    /* ── Recent list ──────────────────────────────────── */
     .recent-item { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #f2f2f2; font-size: .88rem; }
     .recent-item:last-child { border-bottom: none; }
     .recent-item .name { font-weight: 500; }
     .recent-item .date { color: #aaa; font-size: .8rem; }
 
-    /* ── Score badge ──────────────────────────────────── */
-    .badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: .8rem;
-      font-weight: 700;
-    }
-    .badge.high   { background: #dcfce7; color: #16a34a; } /* ≥ 14  */
-    .badge.mid    { background: #fef9c3; color: #ca8a04; } /* 10-13 */
-    .badge.low    { background: #fee2e2; color: #dc2626; } /* < 10  */
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .8rem; font-weight: 700; }
+    .badge.high    { background: #dcfce7; color: #16a34a; }
+    .badge.mid     { background: #fef9c3; color: #ca8a04; }
+    .badge.low     { background: #fee2e2; color: #dc2626; }
+    .badge.present { background: #dcfce7; color: #16a34a; }
+    .badge.absent  { background: #fee2e2; color: #dc2626; }
 
-    /* ── Toast ────────────────────────────────────────── */
     #toast {
       position: fixed; top: 24px; right: 24px;
       padding: 14px 20px; border-radius: 8px;
@@ -95,7 +78,6 @@
     #toast.success { background: #22c55e; }
     #toast.deleted { background: #ef4444; }
 
-    /* ── Delete modal ─────────────────────────────────── */
     #modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,.35);
       display: flex; align-items: center; justify-content: center;
@@ -108,7 +90,6 @@
       transition: transform .2s; text-align: center;
     }
     #modal-overlay.show #modal { transform: scale(1); }
-    #modal .icon { font-size: 2.4rem; margin-bottom: 12px; }
     #modal h3 { font-size: 1.05rem; margin-bottom: 8px; color: #1e1e2e; }
     #modal p  { font-size: .88rem; color: #666; margin-bottom: 24px; line-height: 1.5; }
     .modal-actions { display: flex; gap: 10px; justify-content: center; }
@@ -117,182 +98,195 @@
 </head>
 <body>
 
-<!-- Toast notification -->
 <div id="toast"></div>
 
-<!-- Delete confirm modal -->
 <div id="modal-overlay">
   <div id="modal">
-    <div class="icon">🗑️</div>
-    <h3 id="modal-title">Delete?</h3>
-    <p id="modal-msg">This action cannot be undone.</p>
+    <h3 id="modal-title">Supprimer ?</h3>
+    <p id="modal-msg">Cette action est irréversible.</p>
     <div class="modal-actions">
-      <button class="btn-ghost"  onclick="closeModal()">Cancel</button>
-      <button class="btn-danger" id="modal-confirm">Delete</button>
+      <button class="btn-ghost"  onclick="closeModal()">Annuler</button>
+      <button class="btn-danger" id="modal-confirm">Supprimer</button>
     </div>
   </div>
 </div>
 
-<!-- App layout -->
 <div class="layout">
 
-  <!-- Sidebar -->
   <nav class="sidebar">
-    <div class="logo">🎓 StudentApp</div>
-    <span class="nav-link active" onclick="showPage('dashboard', this)">Dashboard</span>
-    <span class="nav-link"       onclick="showPage('students',  this)">Students</span>
-    <span class="nav-link"       onclick="showPage('add',       this)">Add Student</span>
-    <span class="nav-link"       onclick="showPage('grades',    this)">Grades</span>
+    <div class="logo">Student Management System</div>
+    <span class="nav-link active" onclick="showPage('tableau',   this)">Tableau de bord</span>
+    <span class="nav-link"       onclick="showPage('etudiants', this)">Etudiants</span>
+    <span class="nav-link"       onclick="showPage('ajouter',   this)">Ajouter</span>
+    <span class="nav-link"       onclick="showPage('notes',     this)">Notes</span>
+    <span class="nav-link"       onclick="showPage('presences', this)">Presences</span>
   </nav>
 
   <div class="main">
 
-    <!-- ════ PAGE: Dashboard ════ -->
-    <div id="page-dashboard" class="page active">
-      <h2>Dashboard</h2>
+    <div id="page-tableau" class="page active">
+      <h2>Tableau de bord</h2>
       <div class="cards">
-        <div class="card">
-          <div class="label">Total Students</div>
-          <div class="value" id="stat-total">—</div>
-        </div>
-        <div class="card">
-          <div class="label">Enrolled This Year</div>
-          <div class="value" id="stat-year">—</div>
-        </div>
-        <div class="card">
-          <div class="label">Total Grades</div>
-          <div class="value" id="stat-grades">—</div>
-        </div>
-        <div class="card">
-          <div class="label">Class Average</div>
-          <div class="value" id="stat-avg">—</div>
-        </div>
+        <div class="card"><div class="label">Total etudiants</div><div class="value" id="stat-total">—</div></div>
+        <div class="card"><div class="label">Inscrits cette annee</div><div class="value" id="stat-year">—</div></div>
+        <div class="card"><div class="label">Moyenne generale</div><div class="value" id="stat-avg">—</div></div>
+        <div class="card"><div class="label">Taux de presence</div><div class="value" id="stat-att">—</div></div>
       </div>
       <div class="panel">
-        <h2 style="margin-bottom:12px;font-size:1rem">Recent Students</h2>
-        <div id="recent-list">Loading...</div>
+        <h2 style="margin-bottom:12px;font-size:1rem">Etudiants recents</h2>
+        <div id="recent-list">Chargement...</div>
       </div>
     </div>
 
-    <!-- ════ PAGE: Students table ════ -->
-    <div id="page-students" class="page">
-      <h2>All Students</h2>
+    <div id="page-etudiants" class="page">
+      <h2>Tous les etudiants</h2>
       <div class="panel">
         <table>
-          <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Enrolled</th><th></th></tr></thead>
-          <tbody id="student-list"><tr><td colspan="5">Loading...</td></tr></tbody>
+          <thead><tr><th>#</th><th>Nom complet</th><th>Email</th><th>Date d'inscription</th><th></th></tr></thead>
+          <tbody id="student-list"><tr><td colspan="5">Chargement...</td></tr></tbody>
         </table>
       </div>
     </div>
 
-    <!-- ════ PAGE: Add / Edit student ════ -->
-    <div id="page-add" class="page">
-      <h2 id="form-title">Add Student</h2>
+    <div id="page-ajouter" class="page">
+      <h2 id="form-title">Ajouter un etudiant</h2>
       <div class="panel">
-        <!--
-          BEGINNER NOTE:
-          #s-id is hidden. Empty = create (POST). Filled = update (PUT).
-          One form handles both cases.
-        -->
         <input type="hidden" id="s-id" />
         <div class="form-row">
           <div class="form-group">
-            <label>Full Name</label>
-            <input type="text"  id="s-name"  placeholder="Jane Doe" />
+            <label>Nom complet</label>
+            <input type="text"  id="s-name"  placeholder="ex. Jean Dupont" />
           </div>
           <div class="form-group">
             <label>Email</label>
-            <input type="email" id="s-email" placeholder="jane@example.com" />
+            <input type="email" id="s-email" placeholder="jean@exemple.com" />
           </div>
           <div class="form-group">
-            <label>Enrollment Date</label>
-            <input type="date"  id="s-date" />
+            <label>Date d'inscription</label>
+            <input type="date" id="s-date" />
           </div>
           <div class="form-group" style="justify-content:flex-end">
-            <button class="btn-primary" onclick="saveStudent()">Save</button>
+            <button class="btn-primary" onclick="saveStudent()">Enregistrer</button>
           </div>
           <div class="form-group" style="justify-content:flex-end">
-            <button class="btn-ghost" onclick="cancelStudent()">Clear</button>
+            <button class="btn-ghost" onclick="cancelStudent()">Effacer</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ════ PAGE: Grades (Notes) ════ -->
-    <div id="page-grades" class="page">
-      <h2>Grades</h2>
-
-      <!-- Add / Edit grade form -->
+    <div id="page-notes" class="page">
+      <h2>Notes</h2>
       <div class="panel">
-        <!--
-          BEGINNER NOTE:
-          Same hidden-id trick as the student form.
-          #g-student-id links the grade to a student (foreign key).
-        -->
         <input type="hidden" id="g-id" />
         <div class="form-row">
           <div class="form-group">
-            <label>Student</label>
-            <!-- Dropdown filled from the students list by JS -->
+            <label>Etudiant</label>
             <select id="g-student-id"></select>
           </div>
           <div class="form-group">
-            <label>Subject</label>
-            <input type="text" id="g-subject" placeholder="e.g. Math" style="width:130px" />
+            <label>Matiere</label>
+            <input type="text" id="g-subject" placeholder="ex. Mathematiques" style="width:160px" />
           </div>
           <div class="form-group">
-            <label>Score (0–20)</label>
+            <label>Note (0-20)</label>
             <input type="number" id="g-score" min="0" max="20" step="0.5" placeholder="0" style="width:100px" />
           </div>
           <div class="form-group">
-            <label>Note (optional)</label>
-            <input type="text" id="g-note" placeholder="e.g. Good effort" style="width:180px" />
+            <label>Commentaire</label>
+            <input type="text" id="g-note" placeholder="ex. Bon travail" style="width:160px" />
           </div>
           <div class="form-group">
             <label>Date</label>
             <input type="date" id="g-date" style="width:150px" />
           </div>
           <div class="form-group" style="justify-content:flex-end">
-            <button class="btn-primary" onclick="saveGrade()">Save Grade</button>
+            <button class="btn-primary" onclick="saveGrade()">Enregistrer</button>
           </div>
           <div class="form-group" style="justify-content:flex-end">
-            <button class="btn-ghost" onclick="cancelGrade()">Clear</button>
+            <button class="btn-ghost" onclick="cancelGrade()">Effacer</button>
           </div>
         </div>
       </div>
-
-      <!-- Filter by student -->
       <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px">
-        <label style="font-size:.85rem;color:#666">Filter by student:</label>
+        <label style="font-size:.85rem;color:#666">Filtrer par etudiant :</label>
         <select id="g-filter" onchange="renderGrades()" style="width:200px">
-          <option value="">All students</option>
+          <option value="">Tous les etudiants</option>
         </select>
       </div>
-
-      <!-- Grades table -->
       <div class="panel">
         <table>
-          <thead>
-            <tr><th>Student</th><th>Subject</th><th>Score</th><th>Note</th><th>Date</th><th></th></tr>
-          </thead>
-          <tbody id="grade-list"><tr><td colspan="6">Loading...</td></tr></tbody>
+          <thead><tr><th>Etudiant</th><th>Matiere</th><th>Note /20</th><th>Commentaire</th><th>Date</th><th></th></tr></thead>
+          <tbody id="grade-list"><tr><td colspan="6">Chargement...</td></tr></tbody>
         </table>
       </div>
     </div>
 
-  </div><!-- /main -->
-</div><!-- /layout -->
+    <div id="page-presences" class="page">
+      <h2>Presences</h2>
+      <div class="panel">
+        <input type="hidden" id="a-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Etudiant</label>
+            <select id="a-student-id"></select>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="a-date" style="width:150px" />
+          </div>
+          <div class="form-group">
+            <label>Statut</label>
+            <select id="a-status" style="width:140px">
+              <option value="Present">Present</option>
+              <option value="Absent">Absent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Remarque</label>
+            <input type="text" id="a-remark" placeholder="ex. Maladie" style="width:180px" />
+          </div>
+          <div class="form-group" style="justify-content:flex-end">
+            <button class="btn-primary" onclick="saveAttendance()">Enregistrer</button>
+          </div>
+          <div class="form-group" style="justify-content:flex-end">
+            <button class="btn-ghost" onclick="cancelAttendance()">Effacer</button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="font-size:.85rem;color:#666">Filtrer par etudiant :</label>
+        <select id="a-filter-student" onchange="renderAttendance()" style="width:200px">
+          <option value="">Tous les etudiants</option>
+        </select>
+        <label style="font-size:.85rem;color:#666">Statut :</label>
+        <select id="a-filter-status" onchange="renderAttendance()" style="width:130px">
+          <option value="">Tous</option>
+          <option value="Present">Present</option>
+          <option value="Absent">Absent</option>
+        </select>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>Etudiant</th><th>Date</th><th>Statut</th><th>Remarque</th><th></th></tr></thead>
+          <tbody id="attendance-list"><tr><td colspan="5">Chargement...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <script>
-  const studentsApi = '/api/students';
-  const gradesApi   = '/api/grades';
+  const studentsApi   = '/api/students';
+  const gradesApi     = '/api/grades';
+  const attendanceApi = '/api/attendance';
   const $ = id => document.getElementById(id);
 
-  let allStudents = [];
-  let allGrades   = [];
-  let pendingDelete = null; // { id, type: 'student'|'grade' }
+  let allStudents   = [];
+  let allGrades     = [];
+  let allAttendance = [];
 
-  /* ── Navigation ──────────────────────────────────────*/
   function showPage(name, link) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     $(`page-${name}`).classList.add('active');
@@ -300,90 +294,81 @@
     link.classList.add('active');
   }
 
-  /* ── Toast ───────────────────────────────────────────
-   * type: 'success' (green) or 'deleted' (red)
-   */
   function showToast(message, type = 'success') {
     const t = $('toast');
-    t.textContent = (type === 'success' ? '✅  ' : '🗑️  ') + message;
+    t.textContent = message;
     t.className = `show ${type}`;
     setTimeout(() => { t.className = ''; }, 3000);
   }
 
-  /* ── Modal ───────────────────────────────────────────
-   * Generic delete confirmation.
-   * onConfirm is a function called when the user clicks Delete.
-   */
-  function openModal(title, message, onConfirm) {
-    $('modal-title').textContent = title;
+  function openModal(titre, message, onConfirm) {
+    $('modal-title').textContent = titre;
     $('modal-msg').textContent   = message;
     $('modal-confirm').onclick   = () => { closeModal(); onConfirm(); };
     $('modal-overlay').classList.add('show');
   }
-  function closeModal() {
-    $('modal-overlay').classList.remove('show');
-  }
+
+  function closeModal() { $('modal-overlay').classList.remove('show'); }
+
   $('modal-overlay').addEventListener('click', e => {
     if (e.target === $('modal-overlay')) closeModal();
   });
 
-  /* ── Load everything ─────────────────────────────────
-   * Fetches students and grades in parallel, then renders.
-   */
   async function load() {
-    // Promise.all runs both fetches at the same time (faster)
-    [allStudents, allGrades] = await Promise.all([
+    [allStudents, allGrades, allAttendance] = await Promise.all([
       fetch(studentsApi).then(r => r.json()),
-      fetch(gradesApi).then(r => r.json())
+      fetch(gradesApi).then(r => r.json()),
+      fetch(attendanceApi).then(r => r.json())
     ]);
     renderDashboard();
     renderTable();
     renderStudentDropdowns();
     renderGrades();
+    renderAttendance();
   }
 
-  /* ── Score badge ─────────────────────────────────────
-   * Returns a coloured HTML span based on the score value.
-   * ≥14 = green (high), 10-13 = yellow (mid), <10 = red (low)
-   */
   function scoreBadge(score) {
     const cls = score >= 14 ? 'high' : score >= 10 ? 'mid' : 'low';
-    return `<span class="badge ${cls}">${score}</span>`;
+    return `<span class="badge ${cls}">${score}/20</span>`;
   }
 
-  /* ── Dashboard ───────────────────────────────────────*/
+  function statusBadge(status) {
+    const cls = status === 'Present' ? 'present' : 'absent';
+    return `<span class="badge ${cls}">${status}</span>`;
+  }
+
   function renderDashboard() {
-    const thisYear = new Date().getFullYear();
-    $('stat-total').textContent  = allStudents.length;
-    $('stat-grades').textContent = allGrades.length;
+    const annee = new Date().getFullYear();
+    $('stat-total').textContent = allStudents.length;
+    $('stat-year').textContent  = allStudents.filter(s => new Date(s.enrollmentDate).getFullYear() === annee).length;
 
-    $('stat-year').textContent = allStudents.filter(
-      s => new Date(s.enrollmentDate).getFullYear() === thisYear
-    ).length;
-
-    // Class average score (rounded to 1 decimal)
     if (allGrades.length) {
-      const avg = allGrades.reduce((sum, g) => sum + g.score, 0) / allGrades.length;
-      $('stat-avg').textContent = avg.toFixed(1);
+      const moy = allGrades.reduce((s, g) => s + g.score, 0) / allGrades.length;
+      $('stat-avg').textContent = moy.toFixed(1) + '/20';
     } else {
       $('stat-avg').textContent = '—';
     }
 
-    // 5 most recently enrolled students
-    const recent = [...allStudents]
+    if (allAttendance.length) {
+      const presents = allAttendance.filter(a => a.status === 'Present').length;
+      $('stat-att').textContent = (presents / allAttendance.length * 100).toFixed(0) + '%';
+    } else {
+      $('stat-att').textContent = '—';
+    }
+
+    const recents = [...allStudents]
       .sort((a, b) => new Date(b.enrollmentDate) - new Date(a.enrollmentDate))
       .slice(0, 5);
 
-    $('recent-list').innerHTML = recent.length
-      ? recent.map(s => `
+    $('recent-list').innerHTML = recents.length
+      ? recents.map(s => `
           <div class="recent-item">
             <span class="name">${s.fullName}</span>
             <span class="date">${s.enrollmentDate.slice(0,10)}</span>
           </div>`).join('')
-      : '<p style="color:#aaa;font-size:.85rem">No students yet.</p>';
+      : '<p style="color:#aaa;font-size:.85rem">Aucun etudiant pour l\'instant.</p>';
   }
 
-  /* ── Students table ──────────────────────────────────*/
   function renderTable() {
     $('student-list').innerHTML = allStudents.length
       ? allStudents.map(s => `
@@ -393,34 +378,25 @@
             <td>${s.email}</td>
             <td>${s.enrollmentDate.slice(0,10)}</td>
             <td style="display:flex;gap:6px">
-              <button class="btn-edit"   onclick='startEditStudent(${JSON.stringify(s)})'>Edit</button>
-              <button class="btn-danger" onclick="deleteStudent(${s.id},'${s.fullName.replace(/'/g,"\\'")}')">Delete</button>
+              <button class="btn-edit"   onclick='startEditStudent(${JSON.stringify(s)})'>Modifier</button>
+              <button class="btn-danger" onclick="deleteStudent(${s.id},'${s.fullName.replace(/'/g,"\\'")}')">Supprimer</button>
             </td>
           </tr>`).join('')
-      : '<tr><td colspan="5" style="color:#aaa">No students yet.</td></tr>';
+      : '<tr><td colspan="5" style="color:#aaa">Aucun etudiant.</td></tr>';
   }
 
-  /* ── Student dropdowns ───────────────────────────────
-   * Fills both the grade form select and the filter select.
-   */
   function renderStudentDropdowns() {
     const options = allStudents.map(s => `<option value="${s.id}">${s.fullName}</option>`).join('');
-    $('g-student-id').innerHTML = options || '<option>No students</option>';
-
-    // Filter dropdown has an extra "All" option at the top
-    $('g-filter').innerHTML =
-      '<option value="">All students</option>' + options;
+    const tousOpt = '<option value="">Tous les etudiants</option>';
+    $('g-student-id').innerHTML     = options || '<option>Aucun etudiant</option>';
+    $('g-filter').innerHTML         = tousOpt + options;
+    $('a-student-id').innerHTML     = options || '<option>Aucun etudiant</option>';
+    $('a-filter-student').innerHTML = tousOpt + options;
   }
 
-  /* ── Grades table ────────────────────────────────────
-   * Optionally filters by the selected student in #g-filter.
-   */
   function renderGrades() {
-    const filterVal = $('g-filter').value;
-    const list = filterVal
-      ? allGrades.filter(g => g.studentId == filterVal)
-      : allGrades;
-
+    const fv   = $('g-filter').value;
+    const list = fv ? allGrades.filter(g => g.studentId == fv) : allGrades;
     $('grade-list').innerHTML = list.length
       ? list.map(g => `
           <tr>
@@ -430,29 +406,42 @@
             <td style="color:#888">${g.note || '—'}</td>
             <td>${g.date.slice(0,10)}</td>
             <td style="display:flex;gap:6px">
-              <button class="btn-edit"   onclick='startEditGrade(${JSON.stringify(g)})'>Edit</button>
-              <button class="btn-danger" onclick="deleteGrade(${g.id},'${g.subject}')">Delete</button>
+              <button class="btn-edit"   onclick='startEditGrade(${JSON.stringify(g)})'>Modifier</button>
+              <button class="btn-danger" onclick="deleteGrade(${g.id},'${g.subject}')">Supprimer</button>
             </td>
           </tr>`).join('')
-      : '<tr><td colspan="6" style="color:#aaa">No grades yet.</td></tr>';
+      : '<tr><td colspan="6" style="color:#aaa">Aucune note.</td></tr>';
   }
 
-  /* ── Save student ────────────────────────────────────*/
+  function renderAttendance() {
+    const fs  = $('a-filter-student').value;
+    const fst = $('a-filter-status').value;
+    let list  = allAttendance;
+    if (fs)  list = list.filter(a => a.studentId == fs);
+    if (fst) list = list.filter(a => a.status === fst);
+    $('attendance-list').innerHTML = list.length
+      ? list.map(a => `
+          <tr>
+            <td>${a.studentName}</td>
+            <td>${a.date.slice(0,10)}</td>
+            <td>${statusBadge(a.status)}</td>
+            <td style="color:#888">${a.remark || '—'}</td>
+            <td style="display:flex;gap:6px">
+              <button class="btn-edit"   onclick='startEditAttendance(${JSON.stringify(a)})'>Modifier</button>
+              <button class="btn-danger" onclick="deleteAttendance(${a.id})">Supprimer</button>
+            </td>
+          </tr>`).join('')
+      : '<tr><td colspan="5" style="color:#aaa">Aucune presence.</td></tr>';
+  }
+
   async function saveStudent() {
     const id   = $('s-id').value;
-    const body = {
-      fullName:       $('s-name').value,
-      email:          $('s-email').value,
-      enrollmentDate: $('s-date').value || new Date().toISOString()
-    };
+    const body = { fullName: $('s-name').value, email: $('s-email').value, enrollmentDate: $('s-date').value || new Date().toISOString() };
     await fetch(id ? `${studentsApi}/${id}` : studentsApi, {
-      method:  id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(body)
+      method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
     });
-    showToast(id ? 'Student updated successfully.' : 'Student added successfully.');
+    showToast(id ? 'Etudiant modifie.' : 'Etudiant ajoute.');
     cancelStudent();
-    $('form-title').textContent = 'Add Student';
     await load();
   }
 
@@ -461,24 +450,23 @@
     $('s-name').value  = s.fullName;
     $('s-email').value = s.email;
     $('s-date').value  = s.enrollmentDate.slice(0,10);
-    $('form-title').textContent = 'Edit Student';
-    showPage('add', document.querySelectorAll('.nav-link')[2]);
+    $('form-title').textContent = 'Modifier l\'etudiant';
+    showPage('ajouter', document.querySelectorAll('.nav-link')[2]);
   }
 
   function deleteStudent(id, name) {
-    openModal('Delete Student?', `"${name}" and their grades will be removed.`, async () => {
+    openModal('Supprimer l\'etudiant ?', `"${name}" sera supprime definitivement.`, async () => {
       await fetch(`${studentsApi}/${id}`, { method: 'DELETE' });
-      showToast('Student deleted.', 'deleted');
+      showToast('Etudiant supprime.', 'deleted');
       await load();
     });
   }
 
   function cancelStudent() {
     ['s-id','s-name','s-email','s-date'].forEach(x => $(x).value = '');
-    $('form-title').textContent = 'Add Student';
+    $('form-title').textContent = 'Ajouter un etudiant';
   }
 
-  /* ── Save grade ──────────────────────────────────────*/
   async function saveGrade() {
     const id   = $('g-id').value;
     const body = {
@@ -489,11 +477,9 @@
       date:      $('g-date').value || new Date().toISOString()
     };
     await fetch(id ? `${gradesApi}/${id}` : gradesApi, {
-      method:  id ? 'PUT' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(body)
+      method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
     });
-    showToast(id ? 'Grade updated successfully.' : 'Grade added successfully.');
+    showToast(id ? 'Note modifiee.' : 'Note ajoutee.');
     cancelGrade();
     await load();
   }
@@ -508,15 +494,52 @@
   }
 
   function deleteGrade(id, subject) {
-    openModal('Delete Grade?', `The grade for "${subject}" will be removed.`, async () => {
+    openModal('Supprimer la note ?', `La note de "${subject}" sera supprimee.`, async () => {
       await fetch(`${gradesApi}/${id}`, { method: 'DELETE' });
-      showToast('Grade deleted.', 'deleted');
+      showToast('Note supprimee.', 'deleted');
       await load();
     });
   }
 
   function cancelGrade() {
     ['g-id','g-subject','g-score','g-note','g-date'].forEach(x => $(x).value = '');
+  }
+
+  async function saveAttendance() {
+    const id   = $('a-id').value;
+    const body = {
+      studentId: parseInt($('a-student-id').value),
+      date:      $('a-date').value || new Date().toISOString(),
+      status:    $('a-status').value,
+      remark:    $('a-remark').value
+    };
+    await fetch(id ? `${attendanceApi}/${id}` : attendanceApi, {
+      method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    showToast(id ? 'Presence modifiee.' : 'Presence enregistree.');
+    cancelAttendance();
+    await load();
+  }
+
+  function startEditAttendance(a) {
+    $('a-id').value         = a.id;
+    $('a-student-id').value = a.studentId;
+    $('a-date').value       = a.date.slice(0,10);
+    $('a-status').value     = a.status;
+    $('a-remark').value     = a.remark || '';
+  }
+
+  function deleteAttendance(id) {
+    openModal('Supprimer l\'entree ?', 'Cette presence sera supprimee definitivement.', async () => {
+      await fetch(`${attendanceApi}/${id}`, { method: 'DELETE' });
+      showToast('Presence supprimee.', 'deleted');
+      await load();
+    });
+  }
+
+  function cancelAttendance() {
+    ['a-id','a-date','a-remark'].forEach(x => $(x).value = '');
+    $('a-status').value = 'Present';
   }
 
   load();
