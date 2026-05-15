@@ -5,49 +5,78 @@ using StudentApi.Models;
 
 namespace StudentApi.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class StudentsController : ControllerBase
+    public class StudentsController : Controller
     {
         private readonly AppDbContext _db;
         public StudentsController(AppDbContext db) => _db = db;
-        [HttpGet]
-        public async Task<IEnumerable<Student>> GetAll() =>
-            await _db.Students.ToListAsync(); 
-         [HttpGet("{id}")]
-           public async Task<IActionResult> Get(int id)
+
+        public async Task<IActionResult> Index()
         {
-            var ziad = await _db.Students.FindAsync(id);
-            return ziad is null ? NotFound() : Ok(ziad);
+            var students = await _db.Students.ToListAsync();
+            return View(students);
         }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var student = await _db.Students.FindAsync(id);
+            if (student is null) return NotFound();
+            return View(student);
+        }
+
+        public IActionResult Create() => View();
+
         [HttpPost]
-        public async Task<IActionResult> Create(Student ziad)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Student student)
         {
-            _db.Students.Add(ziad);          
-            await _db.SaveChangesAsync(); 
-            return Ok(ziad);
+            if (!ModelState.IsValid) return View(student);
+            student.EnrollmentDate = DateTime.UtcNow;
+            _db.Students.Add(student);
+            await _db.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Student updated)
+
+        public async Task<IActionResult> Edit(int id)
         {
-            var ziad = await _db.Students.FindAsync(id);
-            if (ziad is null) return NotFound();
-            ziad.FullName = updated.FullName;
-            ziad.Email = updated.Email;
-            ziad.EnrollmentDate = updated.EnrollmentDate;
+            var student = await _db.Students.FindAsync(id);
+            if (student is null) return NotFound();
+            return View(student);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Student updated)
+        {
+            if (id != updated.Id) return BadRequest();
+            if (!ModelState.IsValid) return View(updated);
+
+            var student = await _db.Students.FindAsync(id);
+            if (student is null) return NotFound();
+
+            student.FullName       = updated.FullName;
+            student.Email          = updated.Email;
+            student.EnrollmentDate = updated.EnrollmentDate;
 
             await _db.SaveChangesAsync();
-            return Ok(ziad);
+            return RedirectToAction(nameof(Index));
         }
-        [HttpDelete("{id}")]
+
         public async Task<IActionResult> Delete(int id)
         {
-            var ziad = await _db.Students.FindAsync(id);
-            if (ziad is null) return NotFound();
+            var student = await _db.Students.FindAsync(id);
+            if (student is null) return NotFound();
+            return View(student);
+        }
 
-            _db.Students.Remove(ziad);   
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var student = await _db.Students.FindAsync(id);
+            if (student is null) return NotFound();
+            _db.Students.Remove(student);
             await _db.SaveChangesAsync();
-            return Ok();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

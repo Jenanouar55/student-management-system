@@ -1,0 +1,33 @@
+@model StudentApi.Models.Student
+@{
+    ViewData["Title"] = "Modifier étudiant";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Modifier étudiant</h1>
+    <a class="btn btn-secondary" asp-action="Index">← Retour</a>
+</div>
+
+<div class="card" style="max-width:600px;">
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group">
+            <label asp-for="FullName">Nom complet</label>
+            <input asp-for="FullName" type="text" />
+            <span asp-validation-for="FullName" class="field-error"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Email">Email</label>
+            <input asp-for="Email" type="email" />
+            <span asp-validation-for="Email" class="field-error"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="EnrollmentDate">Date d'inscription</label>
+            <input asp-for="EnrollmentDate" type="datetime-local" />
+        </div>
+        <div style="display:flex; gap:.75rem; margin-top:.5rem;">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <a class="btn btn-secondary" asp-action="Index">Annuler</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,43 @@
+@model StudentApi.Models.Attendance
+@{
+    ViewData["Title"] = "Détails de la présence";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Détails de la présence</h1>
+    <a class="btn btn-secondary" asp-action="Index">← Retour</a>
+</div>
+
+<div class="card" style="max-width:600px;">
+    <table class="detail-table">
+        <tr>
+            <th>Étudiant</th>
+            <td>@Model.Student?.FullName</td>
+        </tr>
+        <tr>
+            <th>Date</th>
+            <td>@Model.Date.ToString("dd/MM/yyyy")</td>
+        </tr>
+        <tr>
+            <th>Statut</th>
+            <td>
+                @{
+                    var badgeClass = Model.Status switch {
+                        "Présent" => "badge-present",
+                        "Absent"  => "badge-absent",
+                        _         => "badge-late"
+                    };
+                }
+                <span class="badge @badgeClass">@Model.Status</span>
+            </td>
+        </tr>
+        <tr>
+            <th>Remarque</th>
+            <td>@Model.Remark</td>
+        </tr>
+    </table>
+    <div style="display:flex; gap:.75rem; margin-top:1.5rem;">
+        <a class="btn btn-secondary" asp-action="Edit"   asp-route-id="@Model.Id">Modifier</a>
+        <a class="btn btn-danger"    asp-action="Delete" asp-route-id="@Model.Id">Supprimer</a>
+    </div>
+</div>

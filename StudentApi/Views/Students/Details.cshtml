@@ -1,0 +1,30 @@
+@model StudentApi.Models.Student
+@{
+    ViewData["Title"] = "Détails étudiant";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Détails étudiant</h1>
+    <a class="btn btn-secondary" asp-action="Index">← Retour</a>
+</div>
+
+<div class="card" style="max-width:600px;">
+    <table class="detail-table">
+        <tr>
+            <th>Nom complet</th>
+            <td>@Model.FullName</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>@Model.Email</td>
+        </tr>
+        <tr>
+            <th>Date d'inscription</th>
+            <td>@Model.EnrollmentDate.ToString("dd/MM/yyyy")</td>
+        </tr>
+    </table>
+    <div style="margin-top:1.5rem; display:flex; gap:.75rem;">
+        <a class="btn btn-secondary" asp-action="Edit" asp-route-id="@Model.Id">Modifier</a>
+        <a class="btn btn-danger"    asp-action="Delete" asp-route-id="@Model.Id">Supprimer</a>
+    </div>
+</div>

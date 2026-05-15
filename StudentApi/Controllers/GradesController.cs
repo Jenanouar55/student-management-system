@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StudentApi.Data;
 using StudentApi.Models;
@@ -6,90 +7,118 @@ using StudentApi.Models;
 namespace StudentApi.Controllers
 {
     /// <summary>
-    /// REST API controller for managing student grades (notes).
-    /// All routes are prefixed with /api/grades.
-    ///
-    /// Endpoints:
-    ///   GET    /api/grades                   → list all grades
-    ///   GET    /api/grades/student/{id}      → list grades for one student
-    ///   POST   /api/grades                   → add a new grade
-    ///   PUT    /api/grades/{id}              → update a grade
-    ///   DELETE /api/grades/{id}              → delete a grade
+    /// MVC controller for Grades CRUD operations.
+    /// All actions are written manually — no scaffolding used.
     /// </summary>
-    [ApiController]
-    [Route("api/[controller]")]
-    public class GradesController : ControllerBase
+    public class GradesController : Controller
     {
         private readonly AppDbContext _db;
         public GradesController(AppDbContext db) => _db = db;
 
-        /// <summary>
-        /// GET /api/grades
-        /// Returns all grades, with the linked student name included.
-        /// </summary>
-        [HttpGet]
-        public async Task<IEnumerable<object>> GetAll() =>
-            await _db.Grades
-                .Include(g => g.Student)   // JOIN with Students table
-                .Select(g => new {
-                    g.Id, g.StudentId,
-                    studentName = g.Student!.FullName,
-                    g.Subject, g.Score, g.Note, g.Date
-                })
+        // GET /Grades
+        public async Task<IActionResult> Index()
+        {
+            var grades = await _db.Grades
+                .Include(g => g.Student)
+                .Include(g => g.Course)
+                .OrderByDescending(g => g.Date)
                 .ToListAsync();
+            return View(grades);
+        }
 
-        /// <summary>
-        /// GET /api/grades/student/{studentId}
-        /// Returns all grades belonging to a specific student.
-        /// </summary>
-        [HttpGet("student/{studentId}")]
-        public async Task<IEnumerable<Grade>> GetByStudent(int studentId) =>
-            await _db.Grades
-                .Where(g => g.StudentId == studentId)
-                .ToListAsync();
+        // GET /Grades/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            var grade = await _db.Grades
+                .Include(g => g.Student)
+                .Include(g => g.Course)
+                .FirstOrDefaultAsync(g => g.Id == id);
+            if (grade is null) return NotFound();
+            return View(grade);
+        }
 
-        /// <summary>
-        /// POST /api/grades
-        /// Adds a new grade record.
-        /// </summary>
+        // GET /Grades/Create
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName");
+            ViewBag.Courses  = new SelectList(await _db.Courses.ToListAsync(),  "Id", "Name");
+            return View();
+        }
+
+        // POST /Grades/Create
         [HttpPost]
-        public async Task<IActionResult> Create(Grade g)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Grade grade)
         {
-            _db.Grades.Add(g);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName");
+                ViewBag.Courses  = new SelectList(await _db.Courses.ToListAsync(),  "Id", "Name");
+                return View(grade);
+            }
+            grade.Date = DateTime.UtcNow;
+            _db.Grades.Add(grade);
             await _db.SaveChangesAsync();
-            return Ok(g);
+            return RedirectToAction(nameof(Index));
         }
 
-        /// <summary>
-        /// PUT /api/grades/{id}
-        /// Updates subject, score, note, and date of an existing grade.
-        /// </summary>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Grade updated)
+        // GET /Grades/Edit/5
+        public async Task<IActionResult> Edit(int id)
         {
-            var g = await _db.Grades.FindAsync(id);
-            if (g is null) return NotFound();
-            g.StudentId = updated.StudentId;
-            g.Subject   = updated.Subject;
-            g.Score     = updated.Score;
-            g.Note      = updated.Note;
-            g.Date      = updated.Date;
-            await _db.SaveChangesAsync();
-            return Ok(g);
+            var grade = await _db.Grades.FindAsync(id);
+            if (grade is null) return NotFound();
+            ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName", grade.StudentId);
+            ViewBag.Courses  = new SelectList(await _db.Courses.ToListAsync(),  "Id", "Name",     grade.CourseId);
+            return View(grade);
         }
 
-        /// <summary>
-        /// DELETE /api/grades/{id}
-        /// Removes a grade record permanently.
-        /// </summary>
-        [HttpDelete("{id}")]
+        // POST /Grades/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Grade updated)
+        {
+            if (id != updated.Id) return BadRequest();
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName");
+                ViewBag.Courses  = new SelectList(await _db.Courses.ToListAsync(),  "Id", "Name");
+                return View(updated);
+            }
+
+            var grade = await _db.Grades.FindAsync(id);
+            if (grade is null) return NotFound();
+
+            grade.StudentId = updated.StudentId;
+            grade.CourseId  = updated.CourseId;
+            grade.Score     = updated.Score;
+            grade.Note      = updated.Note;
+            grade.Date      = updated.Date;
+
+            await _db.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET /Grades/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var g = await _db.Grades.FindAsync(id);
-            if (g is null) return NotFound();
-            _db.Grades.Remove(g);
+            var grade = await _db.Grades
+                .Include(g => g.Student)
+                .Include(g => g.Course)
+                .FirstOrDefaultAsync(g => g.Id == id);
+            if (grade is null) return NotFound();
+            return View(grade);
+        }
+
+        // POST /Grades/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var grade = await _db.Grades.FindAsync(id);
+            if (grade is null) return NotFound();
+            _db.Grades.Remove(grade);
             await _db.SaveChangesAsync();
-            return Ok();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,0 +1,45 @@
+@model IEnumerable<StudentApi.Models.Grade>
+@{
+    ViewData["Title"] = "Notes";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Notes</h1>
+    <a class="btn btn-primary" asp-action="Create">+ Ajouter</a>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Étudiant</th>
+                    <th>Cours</th>
+                    <th>Note / 20</th>
+                    <th>Remarque</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var g in Model)
+                {
+                    <tr>
+                        <td>@g.Student?.FullName</td>
+                        <td>@g.Course?.Name</td>
+                        <td>@g.Score</td>
+                        <td>@g.Note</td>
+                        <td>@g.Date.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <div class="actions">
+                                <a class="btn btn-secondary btn-sm" asp-action="Details" asp-route-id="@g.Id">Détails</a>
+                                <a class="btn btn-secondary btn-sm" asp-action="Edit"    asp-route-id="@g.Id">Modifier</a>
+                                <a class="btn btn-danger btn-sm"    asp-action="Delete"  asp-route-id="@g.Id">Supprimer</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

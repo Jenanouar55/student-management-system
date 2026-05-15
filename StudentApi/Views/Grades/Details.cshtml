@@ -1,0 +1,38 @@
+@model StudentApi.Models.Grade
+@{
+    ViewData["Title"] = "Détails de la note";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Détails de la note</h1>
+    <a class="btn btn-secondary" asp-action="Index">← Retour</a>
+</div>
+
+<div class="card" style="max-width:600px;">
+    <table class="detail-table">
+        <tr>
+            <th>Étudiant</th>
+            <td>@Model.Student?.FullName</td>
+        </tr>
+        <tr>
+            <th>Cours</th>
+            <td>@Model.Course?.Name</td>
+        </tr>
+        <tr>
+            <th>Note (/ 20)</th>
+            <td>@Model.Score</td>
+        </tr>
+        <tr>
+            <th>Remarque</th>
+            <td>@Model.Note</td>
+        </tr>
+        <tr>
+            <th>Date</th>
+            <td>@Model.Date.ToString("dd/MM/yyyy")</td>
+        </tr>
+    </table>
+    <div style="display:flex; gap:.75rem; margin-top:1.5rem;">
+        <a class="btn btn-secondary" asp-action="Edit" asp-route-id="@Model.Id">Modifier</a>
+        <a class="btn btn-danger"    asp-action="Delete" asp-route-id="@Model.Id">Supprimer</a>
+    </div>
+</div>

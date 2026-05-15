@@ -1,0 +1,28 @@
+@model StudentApi.Models.Student
+@{
+    ViewData["Title"] = "Ajouter un étudiant";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Ajouter un étudiant</h1>
+    <a class="btn btn-secondary" asp-action="Index">← Retour</a>
+</div>
+
+<div class="card" style="max-width:600px;">
+    <form asp-action="Create" method="post">
+        <div class="form-group">
+            <label asp-for="FullName">Nom complet</label>
+            <input asp-for="FullName" type="text" placeholder="Ex: Ahmed Bennani" />
+            <span asp-validation-for="FullName" class="field-error"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Email">Email</label>
+            <input asp-for="Email" type="email" placeholder="ahmed@exemple.com" />
+            <span asp-validation-for="Email" class="field-error"></span>
+        </div>
+        <div style="display:flex; gap:.75rem; margin-top:.5rem;">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <a class="btn btn-secondary" asp-action="Index">Annuler</a>
+        </div>
+    </form>
+</div>

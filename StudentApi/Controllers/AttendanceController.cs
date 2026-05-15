@@ -1,99 +1,103 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using StudentApi.Data;
 using StudentApi.Models;
 
 namespace StudentApi.Controllers
 {
-    /// <summary>
-    /// REST API controller for managing attendance records.
-    /// All routes are prefixed with /api/attendance.
-    ///
-    /// Endpoints:
-    ///   GET    /api/attendance                  → list all records (with student name)
-    ///   GET    /api/attendance/student/{id}     → list records for one student
-    ///   POST   /api/attendance                  → add a new record
-    ///   PUT    /api/attendance/{id}             → update a record
-    ///   DELETE /api/attendance/{id}             → delete a record
-    /// </summary>
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AttendanceController : ControllerBase
+    public class AttendanceController : Controller
     {
         private readonly AppDbContext _db;
         public AttendanceController(AppDbContext db) => _db = db;
 
-        /// <summary>
-        /// GET /api/attendance
-        /// Returns all attendance records joined with the student name.
-        /// </summary>
-        [HttpGet]
-        public async Task<IEnumerable<object>> GetAll() =>
-            await _db.Attendances
+        public async Task<IActionResult> Index()
+        {
+            var records = await _db.Attendances
                 .Include(a => a.Student)
-                .Select(a => new {
-                    a.Id,
-                    a.StudentId,
-                    studentName = a.Student!.FullName,
-                    a.Date,
-                    a.Status,
-                    a.Remark
-                })
                 .OrderByDescending(a => a.Date)
                 .ToListAsync();
+            return View(records);
+        }
 
-        /// <summary>
-        /// GET /api/attendance/student/{studentId}
-        /// Returns attendance records for a single student.
-        /// </summary>
-        [HttpGet("student/{studentId}")]
-        public async Task<IEnumerable<Attendance>> GetByStudent(int studentId) =>
-            await _db.Attendances
-                .Where(a => a.StudentId == studentId)
-                .OrderByDescending(a => a.Date)
-                .ToListAsync();
+        public async Task<IActionResult> Details(int id)
+        {
+            var record = await _db.Attendances
+                .Include(a => a.Student)
+                .FirstOrDefaultAsync(a => a.Id == id);
+            if (record is null) return NotFound();
+            return View(record);
+        }
 
-        /// <summary>
-        /// POST /api/attendance
-        /// Creates a new attendance record.
-        /// </summary>
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName");
+            return View();
+        }
+
         [HttpPost]
-        public async Task<IActionResult> Create(Attendance a)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Attendance attendance)
         {
-            _db.Attendances.Add(a);
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName");
+                return View(attendance);
+            }
+            _db.Attendances.Add(attendance);
             await _db.SaveChangesAsync();
-            return Ok(a);
+            return RedirectToAction(nameof(Index));
         }
 
-        /// <summary>
-        /// PUT /api/attendance/{id}
-        /// Updates the student, date, status, and remark of a record.
-        /// </summary>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, Attendance updated)
+        public async Task<IActionResult> Edit(int id)
         {
-            var a = await _db.Attendances.FindAsync(id);
-            if (a is null) return NotFound();
-            a.StudentId = updated.StudentId;
-            a.Date      = updated.Date;
-            a.Status    = updated.Status;
-            a.Remark    = updated.Remark;
-            await _db.SaveChangesAsync();
-            return Ok(a);
+            var record = await _db.Attendances.FindAsync(id);
+            if (record is null) return NotFound();
+            ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName", record.StudentId);
+            return View(record);
         }
 
-        /// <summary>
-        /// DELETE /api/attendance/{id}
-        /// Removes an attendance record permanently.
-        /// </summary>
-        [HttpDelete("{id}")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Attendance updated)
+        {
+            if (id != updated.Id) return BadRequest();
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName");
+                return View(updated);
+            }
+
+            var record = await _db.Attendances.FindAsync(id);
+            if (record is null) return NotFound();
+
+            record.StudentId = updated.StudentId;
+            record.Date      = updated.Date;
+            record.Status    = updated.Status;
+            record.Remark    = updated.Remark;
+
+            await _db.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
         public async Task<IActionResult> Delete(int id)
         {
-            var a = await _db.Attendances.FindAsync(id);
-            if (a is null) return NotFound();
-            _db.Attendances.Remove(a);
+            var record = await _db.Attendances
+                .Include(a => a.Student)
+                .FirstOrDefaultAsync(a => a.Id == id);
+            if (record is null) return NotFound();
+            return View(record);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var record = await _db.Attendances.FindAsync(id);
+            if (record is null) return NotFound();
+            _db.Attendances.Remove(record);
             await _db.SaveChangesAsync();
-            return Ok();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

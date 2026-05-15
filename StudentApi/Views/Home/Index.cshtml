@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Tableau de bord";
+}
+
+<div class="stats-grid">
+    <div class="stat-card stat-card-accent">
+        <span class="stat-label">Étudiants inscrits</span>
+        <span class="stat-value">@ViewBag.StudentCount</span>
+        <span class="stat-desc">Total des étudiants</span>
+    </div>
+    <div class="stat-card stat-card-accent">
+        <span class="stat-label">Cours disponibles</span>
+        <span class="stat-value">@ViewBag.CourseCount</span>
+        <span class="stat-desc">Total des cours</span>
+    </div>
+    <div class="stat-card stat-card-accent">
+        <span class="stat-label">Notes enregistrées</span>
+        <span class="stat-value">@ViewBag.GradeCount</span>
+        <span class="stat-desc">Total des notes</span>
+    </div>
+    <div class="stat-card stat-card-accent">
+        <span class="stat-label">Présences enregistrées</span>
+        <span class="stat-value">@ViewBag.AttendanceCount</span>
+        <span class="stat-desc">Total des présences</span>
+    </div>
+</div>
+
+<div class="card">
+    <div class="page-header" style="margin-bottom:1rem;">
+        <span class="page-title" style="font-size:1rem;">Accès rapide</span>
+    </div>
+    <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.25rem;">
+        Bienvenue dans le système de gestion des étudiants. Utilisez le menu latéral ou les raccourcis ci-dessous.
+    </p>
+    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <a class="btn btn-primary"   asp-controller="Students"   asp-action="Index">Étudiants</a>
+        <a class="btn btn-secondary" asp-controller="Courses"    asp-action="Index">Cours</a>
+        <a class="btn btn-secondary" asp-controller="Grades"     asp-action="Index">Notes</a>
+        <a class="btn btn-secondary" asp-controller="Attendance" asp-action="Index">Présences</a>
+    </div>
+</div>

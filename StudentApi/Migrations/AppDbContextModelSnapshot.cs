@@ -51,6 +51,34 @@ namespace StudentApi.Migrations
                     b.ToTable("Attendances");
                 });
 
+            modelBuilder.Entity("StudentApi.Models.Course", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Credits")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Teacher")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Courses");
+                });
+
             modelBuilder.Entity("StudentApi.Models.Grade", b =>
                 {
                     b.Property<int>("Id")
@@ -58,6 +86,9 @@ namespace StudentApi.Migrations
                         .HasColumnType("int");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime(6)");
@@ -72,11 +103,9 @@ namespace StudentApi.Migrations
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
 
                     b.HasIndex("StudentId");
 
@@ -120,13 +149,26 @@ namespace StudentApi.Migrations
 
             modelBuilder.Entity("StudentApi.Models.Grade", b =>
                 {
+                    b.HasOne("StudentApi.Models.Course", "Course")
+                        .WithMany("Grades")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("StudentApi.Models.Student", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Course");
+
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("StudentApi.Models.Course", b =>
+                {
+                    b.Navigation("Grades");
                 });
 #pragma warning restore 612, 618
         }

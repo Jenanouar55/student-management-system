@@ -1,0 +1,56 @@
+@model IEnumerable<StudentApi.Models.Attendance>
+@{
+    ViewData["Title"] = "Présences";
+}
+
+<div class="page-header">
+    <h1 class="page-title">Présences</h1>
+    <a class="btn btn-primary" asp-action="Create">+ Ajouter</a>
+</div>
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Étudiant</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Remarque</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td>@a.Student?.FullName</td>
+                        <td>@a.Date.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            @if (a.Status == "Present")
+                            {
+                                <span class="badge badge-present">Présent</span>
+                            }
+                            else if (a.Status == "Absent")
+                            {
+                                <span class="badge badge-absent">Absent</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-late">En retard</span>
+                            }
+                        </td>
+                        <td>@a.Remark</td>
+                        <td>
+                            <div class="actions">
+                                <a class="btn btn-secondary btn-sm" asp-action="Details" asp-route-id="@a.Id">Détails</a>
+                                <a class="btn btn-secondary btn-sm" asp-action="Edit"    asp-route-id="@a.Id">Modifier</a>
+                                <a class="btn btn-danger btn-sm"    asp-action="Delete"  asp-route-id="@a.Id">Supprimer</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
