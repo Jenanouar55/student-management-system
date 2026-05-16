@@ -6,16 +6,11 @@ using StudentApi.Models;
 
 namespace StudentApi.Controllers
 {
-    /// <summary>
-    /// MVC controller for Grades CRUD operations.
-    /// All actions are written manually — no scaffolding used.
-    /// </summary>
     public class GradesController : Controller
     {
         private readonly AppDbContext _db;
         public GradesController(AppDbContext db) => _db = db;
 
-        // GET /Grades
         public async Task<IActionResult> Index()
         {
             var grades = await _db.Grades
@@ -26,7 +21,6 @@ namespace StudentApi.Controllers
             return View(grades);
         }
 
-        // GET /Grades/Details/5
         public async Task<IActionResult> Details(int id)
         {
             var grade = await _db.Grades
@@ -37,7 +31,6 @@ namespace StudentApi.Controllers
             return View(grade);
         }
 
-        // GET /Grades/Create
         public async Task<IActionResult> Create()
         {
             ViewBag.Students = new SelectList(await _db.Students.ToListAsync(), "Id", "FullName");
@@ -45,7 +38,6 @@ namespace StudentApi.Controllers
             return View();
         }
 
-        // POST /Grades/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Grade grade)
@@ -62,7 +54,6 @@ namespace StudentApi.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET /Grades/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var grade = await _db.Grades.FindAsync(id);
@@ -72,7 +63,6 @@ namespace StudentApi.Controllers
             return View(grade);
         }
 
-        // POST /Grades/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Grade updated)
@@ -98,7 +88,6 @@ namespace StudentApi.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET /Grades/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             var grade = await _db.Grades
@@ -109,7 +98,6 @@ namespace StudentApi.Controllers
             return View(grade);
         }
 
-        // POST /Grades/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

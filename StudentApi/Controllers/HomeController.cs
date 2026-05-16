@@ -9,7 +9,6 @@ namespace StudentApi.Controllers
         private readonly AppDbContext _db;
         public HomeController(AppDbContext db) => _db = db;
 
-        // GET /
         public async Task<IActionResult> Index()
         {
             ViewBag.StudentCount    = await _db.Students.CountAsync();

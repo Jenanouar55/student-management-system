@@ -20,7 +20,19 @@ namespace StudentApi.Migrations
             migrationBuilder.Sql("INSERT INTO `Courses` (`Name`, `Description`, `Credits`, `Teacher`) SELECT 'Cours par défaut', 'Cours assigné automatiquement à la migration', 0, '' WHERE NOT EXISTS (SELECT 1 FROM `Courses`);");
 
             // Add CourseId nullable first
-            migrationBuilder.Sql("ALTER TABLE `Grades` ADD COLUMN IF NOT EXISTS `CourseId` int NULL;");
+            migrationBuilder.Sql(@"
+                SET @col_exists = (
+                    SELECT COUNT(*) FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Grades' AND COLUMN_NAME = 'CourseId'
+                );
+                SET @sql = IF(@col_exists = 0,
+                    'ALTER TABLE Grades ADD COLUMN CourseId int NULL',
+                    'SELECT 1'
+                );
+                PREPARE stmt FROM @sql;
+                EXECUTE stmt;
+                DEALLOCATE PREPARE stmt;
+            ");
 
             // Point all existing grades to the default course
             migrationBuilder.Sql("UPDATE `Grades` SET `CourseId` = (SELECT MIN(`Id`) FROM `Courses`) WHERE `CourseId` IS NULL;");

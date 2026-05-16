@@ -27,9 +27,15 @@ namespace StudentApi.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Course course)
+        public async Task<IActionResult> Create(string Name, string Description, int Credits, string Teacher)
         {
-            if (!ModelState.IsValid) return View(course);
+            var course = new Course
+            {
+                Name        = Name        ?? "",
+                Description = Description ?? "",
+                Credits     = Credits,
+                Teacher     = Teacher     ?? ""
+            };
             _db.Courses.Add(course);
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -44,18 +50,15 @@ namespace StudentApi.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Course updated)
+        public async Task<IActionResult> Edit(int id, string Name, string Description, int Credits, string Teacher)
         {
-            if (id != updated.Id) return BadRequest();
-            if (!ModelState.IsValid) return View(updated);
-
             var course = await _db.Courses.FindAsync(id);
             if (course is null) return NotFound();
 
-            course.Name        = updated.Name;
-            course.Description = updated.Description;
-            course.Credits     = updated.Credits;
-            course.Teacher     = updated.Teacher;
+            course.Name        = Name        ?? "";
+            course.Description = Description ?? "";
+            course.Credits     = Credits;
+            course.Teacher     = Teacher     ?? "";
 
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
